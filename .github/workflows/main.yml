@@ -32,7 +32,15 @@ jobs:
         run: curl ${{ env.URL }}
 
       - name: Selenium Preparation
+
+      - name: Selenium Firefox
         run: docker run --network=isolated -d -p 4444:4444 -p 7900:7900 -v /dev/shm:/dev/shm --name firefox-standalone selenium/standalone-firefox:latest
+
+      - name: Selenium Chrome
+        run: docker run --network=isolated -d -p 4445:4444 -p 7901:7900 -v /dev/shm:/dev/shm --name chrome-standalone selenium/standalone-chrome:latest
+
+      - name: Selenium Edge
+        run: docker run --network=isolated -d -p 4446:4444 -p 7902:7900 -v /dev/shm:/dev/shm --name edge-standalone selenium/standalone-edge:latest
 
       - name: Wait for Selenium Hub
         run: sh wait.sh
@@ -43,8 +51,12 @@ jobs:
       - name: Install Selenium client
         run: pip install -U selenium
 
-      - name: Run test
-        run: python tests/hello_aut.py ${{ env.URL }}
+      - name: Run Selenium Tests (Parallel)
+        run: |
+          python tests/hello_aut.py ${{ env.URL }} firefox &
+          python tests/hello_aut.py ${{ env.URL }} chrome &
+          python tests/hello_aut.py ${{ env.URL }} edge &
+          wait
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
