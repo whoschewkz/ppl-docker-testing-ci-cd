@@ -26,4 +26,10 @@ jobs:
       - name: Get AUT URL
         run: |
           URL=http://$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
-          echo "URL=$URL" >> $GITHUB_EN_
+          echo "URL=$URL" >> $GITHUB_ENV
+
+      - name: Check AUT Url
+        run: curl ${{ env.URL }}
+
+      - name: stop docker
+        run: docker stop docker-apache
